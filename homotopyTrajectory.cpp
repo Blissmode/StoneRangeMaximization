@@ -57,7 +57,7 @@ int main()
         pathangle+=dpathangle;
 
         // cout<<"Time:"<<flighttime<<"||"<<"Range:"<<range<<"||"<<"Path Angle:"<<pathangle<<"||"<<"Height:"<<height<<"||"<<"Velocity:"<<velocity<<"||"<<"Density:"<<density<<"||load:"<<load<<endl;
-        cout<<load<<",";
+        // cout<<height<<",";
     }
     cout<<"]";
 }
@@ -92,8 +92,8 @@ void obtainIncrements()
 
     load=density*velocity*velocity*surfaceArea*sqrt(zeroLiftDragCoeff/liftInducedDragCoeff)/(2*mass*g);
 
-    // if(dheight>0)
-    //     dheight*=-1;
-    // if(drange<0)
-    //     drange*=-1;
+    if(dheight>0)
+        dheight*=-1;
+    if(drange<0)
+        drange*=-1;
 }
