@@ -1,5 +1,6 @@
 import math
 import matplotlib.pyplot as plt
+import time 
 # Initialize all the constant parameters that need not be changed throughout the program
 
 g=9.8
@@ -49,12 +50,12 @@ def initialize():
 
     return intialLift,height,velocity,pathangle,density,loadMax
 
+
 def plot_graphs(velocities,range_currs,pathangles,time,control_input,heights):
     plt.plot(time,control_input)
     plt.ylabel('control_input')
     plt.xlabel('time')
     plt.savefig('controlVsTime.jpg')
-
     plt.close()
 
     plt.plot(time,velocities)
@@ -76,7 +77,40 @@ def plot_graphs(velocities,range_currs,pathangles,time,control_input,heights):
     plt.savefig('altitudeVsrange.jpg')
     plt.close()
 
-    # plt.plot()
+
+def simulate(velocities,range_currs,pathangles,time,control_input,heights):
+
+    plt.subplot(2,2,1)
+    plt.plot(time,control_input)
+    plt.ylabel('control_input')
+    plt.xlabel('time')
+    # plt.savefig('controlVsTime.jpg')
+    # plt.close()
+
+    plt.subplot(2,2,2)    
+    plt.plot(time,velocities)
+    plt.ylabel('velocity')
+    plt.xlabel('time')
+    # plt.savefig('velocityVsTime.jpg')
+    # plt.close()
+
+    plt.subplot(2,2,3)
+    plt.plot(time,pathangles)
+    plt.ylabel('path angle')
+    plt.xlabel('time')
+    # plt.savefig('Path_angleVsTime.jpg')
+    # plt.close()
+
+    plt.subplot(2,2,4)
+    plt.plot(range_currs,heights)
+    plt.ylabel('Altitude')
+    plt.xlabel('Range')
+    # plt.savefig('altitudeVsrange.jpg')
+    # plt.close()
+
+    plt.show(block=False)
+    plt.pause(1)
+    plt.close()
 
 
 def obtainIncrements(velocity,pathangle,height,range_curr,load):
@@ -94,33 +128,10 @@ def obtainIncrements(velocity,pathangle,height,range_curr,load):
 
     return drange,dheight,dpathangle,dvelocity,load
 
-def rungeKutta(x0, y0, x, h): 
-    # Count number of iterations using step size or 
-    # step height h 
-    n = (int)((x - x0)/h)  
-    # Iterate for number of iterations 
-    y = y0 
-    for i in range(1, n + 1): 
-        "Apply Runge Kutta Formulas to find next value of y"
-        k1 = h * dydx(x0, y) 
-        k2 = h * dydx(x0 + 0.5 * h, y + 0.5 * k1) 
-        k3 = h * dydx(x0 + 0.5 * h, y + 0.5 * k2) 
-        k4 = h * dydx(x0 + h, y + k3) 
-  
-        # Update next value of y 
-        y = y + (1.0 / 6.0)*(k1 + 2 * k2 + 2 * k3 + k4) 
-  
-        # Update next value of x 
-        x0 = x0 + h 
-    return y 
 
 
-
-if __name__ == "__main__":
-
-    #Setting up variables
+def solve_by_euler(incrementTime):
     intialLift,height,velocity,pathangle,density,loadMax=initialize() 
-    incrementTime=0.001
     
     #Checking for LoadMax quantity
     load=loadMax
@@ -136,33 +147,45 @@ if __name__ == "__main__":
     time=[]
     control_input=[]
 
+ 
+    call=0
 
-    #Euler Method
 
-
-    # while height>=0:
-    #     flighttime=flighttime+incrementTime
-    #     drange,dheight,dpathangle,dvelocity,load=obtainIncrements(velocity,pathangle,height,range_curr,load)
+    while height>=0:
+        flighttime=flighttime+incrementTime
+        drange,dheight,dpathangle,dvelocity,load=obtainIncrements(velocity,pathangle,height,range_curr,load)
         
-    #     velocities.append(velocity)
-    #     range_currs.append(range_curr)
-    #     pathangles.append(pathangle)
-    #     time.append(flighttime)
-    #     control_input.append(load)
-    #     heights.append(height)
+        velocities.append(velocity)
+        range_currs.append(range_curr)
+        pathangles.append(pathangle)
+        time.append(flighttime)
+        control_input.append(load)
+        heights.append(height)
 
-    #     #updating the increments for each iteration
-    #     range_curr=range_curr+drange*incrementTime
-    #     height=height+dheight*incrementTime
-    #     velocity=velocity+dvelocity*incrementTime
-    #     pathangle=pathangle+dpathangle*incrementTime
+        #updating the increments for each iteration
+        range_curr=range_curr+drange*incrementTime
+        height=height+dheight*incrementTime
+        velocity=velocity+dvelocity*incrementTime
+        pathangle=pathangle+dpathangle*incrementTime
 
-    #     print(flighttime," ",range_curr," ",pathangle," ",height," ",velocity," ",density," ",load)
+        print(flighttime," ",range_curr," ",pathangle," ",height," ",velocity," ",density," ",load)
 
-    #RK method
-    
-    intialLift,height,velocity,pathangle,density,loadMax=initialize() 
-    incrementTime=0.001
+        # Uncomment for simulations.
+
+        # if call%100==0:
+        #     simulate(velocities,range_currs,pathangles,time,control_input,heights)
+        # call=call+1
+
+
+    return velocities,range_currs,heights,pathangles,time,control_input
+
+
+
+
+
+def solve_by_RK4th(incrementTime):
+
+    intialLift,height,velocity,pathangle,density,loadMax=initialize()
     
     #Checking for LoadMax quantity
     load=loadMax
@@ -177,6 +200,8 @@ if __name__ == "__main__":
     pathangles=[]
     time=[]
     control_input=[]
+
+    call=0
 
 
     while height>=0:
@@ -202,6 +227,12 @@ if __name__ == "__main__":
         control_input.append(load)
         heights.append(height)
 
+        # Uncomment for simulations.
+
+        # if call%100==0:
+        #     simulate(velocities,range_currs,pathangles,time,control_input,heights)
+        # call=call+1
+
         #updating the increments for each iteration
         range_curr=range_curr+(1/6)*drange*incrementTime
         height=height+(1/6)*dheight*incrementTime
@@ -210,11 +241,20 @@ if __name__ == "__main__":
 
         print(flighttime," ",range_curr," ",pathangle," ",height," ",velocity," ",density," ",load)
 
-
-
+    return velocities,range_currs,heights,pathangles,time,control_input
     
 
 
+
+if __name__ == "__main__":
+    # Defines the time step.
+
+    incrementTime=0.1
+    
+    # To run simulations for Euler method.
+    velocities,range_currs,heights,pathangles,time,control_input= solve_by_euler(incrementTime)
+    # To run simulations for RK method.
+    velocities,range_currs,heights,pathangles,time,control_input=solve_by_RK4th(incrementTime)
 
     plot_graphs(velocities,range_currs,pathangles,time,control_input,heights)
             
